@@ -1,0 +1,51 @@
+import requests
+
+class DOIClient:
+    def __init__(self, api_key):
+        self.api_key = api_key
+        self.base_url = "https://api.doi.org/"
+
+    def create_doi(self, metadata):
+        headers = {
+            "Content-Type": "application/vnd.api+json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+        url = f"{self.base_url}dois"
+        response = requests.post(url, headers=headers, json=metadata)
+        if response.status_code == 201:
+            doi = response.json()["data"]["id"]
+            return doi
+        else:
+            raise Exception(f"DOI creation failed. Error: {response.text}")
+
+# Example usage:
+
+api_key = "YOUR_API_KEY"
+client = DOIClient(api_key)
+
+def generate_patent_doi(patent_data):
+    metadata = {
+        "data": {
+            "type": "dois",
+            "attributes": {
+                "prefix": "10.1234",
+                "suffix": "",  # You can customize the suffix based on the patent data
+                "url": "https://example.com/patents"  # Replace with your patent data URL
+            }
+        }
+    }
+
+    # Create a DOI for the patent data
+    doi = client.create_doi(metadata)
+    return doi
+
+# Example usage:
+patent_data = {
+    "title": "Example Patent",
+    "inventor": "John Doe",
+    "year": 2023,
+    "abstract": "This is an example patent abstract."
+}
+
+doi = generate_patent_doi(patent_data)
+print(f"DOI assigned to the patent data: {doi}")
